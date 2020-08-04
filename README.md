@@ -1,4 +1,4 @@
-REQUIRED LIBRARIES:
+# REQUIRED LIBRARIES:
 OutputBox (My repo: Output-Box)
 Jsoup (External: https://jsoup.org/download)
 SubscriptionsReader (My repo: Subscriptions-Reader)
