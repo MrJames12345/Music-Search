@@ -1,7 +1,3 @@
- /* INCLUDES LIBRARIES:
-    OutputBox
- */
-
 import java.util.*;
 import java.io.*;
 
@@ -51,45 +47,54 @@ class MusicSearch
                 // Get subscription
                 subscription = subReader.getNextSubscription();
 
-                // IF is not a new subscription, get new songs
-                if ( !subReader.isNewSub( subscription ) )
-                {
-                    // Get the subscription's data
-                    subscriptionData = subReader.getSubscriptionsData( subscription );
-
-                    // PRINT 'checking channel' message with name of channel
-                    outputBox.update( "Checking channel: " + subscriptionData.get("Name") );
-
-                    // Set youtube scraper's channel, then get list of new songs
-                    youtubeScraper.setChannel( subscriptionData.get( "URL" ), numConnectTries );
-                    songsList = youtubeScraper.getNewSongs( subscriptionData.get( "LatestHref" ) );
-
-                    // Add songs to 'NewMusic' save (doesn't add if no songs)
-                    musicSaver.addSongs( songsList );
-
-                    // Create updated subscription to add to list of updated subsscriptions later
-                    subscription = youtubeScraper.createSubscription();
-
-                    // PRINT subscription completed message depending on how many songs found
-                    printSubscriptionSuccess( outputBox, songsList.size() );
-
-                }
-                // ELSE IF new, just create subscription
-                else
+                try
                 {
 
-                    // Set youtube scraper's channel, then create a subscription from this
-                    youtubeScraper.setChannel( subscription, numConnectTries );
-                    subscription = youtubeScraper.createSubscription();
+                    // IF is not a new subscription, get new songs
+                    if ( !subReader.isNewSub( subscription ) )
+                    {
+                        // Get the subscription's data
+                        subscriptionData = subReader.getSubscriptionsData( subscription );
 
-                    // PRINT 'created subscription' message with name of channel
-                    subscriptionData = subReader.getSubscriptionsData( subscription );
-                    outputBox.update( "Created new subscription: " + subscriptionData.get("Name") );
+                        // PRINT 'checking channel' message with name of channel
+                        outputBox.update( "Checking channel: " + subscriptionData.get("Name") + "..." );
+
+                        // Set youtube scraper's channel, then get list of new songs
+                        youtubeScraper.setChannel( subscriptionData.get( "URL" ), numConnectTries );
+                        songsList = youtubeScraper.getNewSongs( subscriptionData.get( "LatestHref" ) );
+
+                        // Add songs to 'NewMusic' save (doesn't add if no songs)
+                        musicSaver.addSongs( songsList );
+
+                        // Create updated subscription to add to list of updated subsscriptions later
+                        subscription = youtubeScraper.createSubscription();
+
+                        // PRINT subscription completed message depending on how many songs found
+                        printSubscriptionSuccess( outputBox, songsList.size() );
+
+                    }
+                    // ELSE IF new, just create subscription
+                    else
+                    {
+
+                        // Set youtube scraper's channel, then create a subscription from this
+                        youtubeScraper.setChannel( subscription, numConnectTries );
+                        subscription = youtubeScraper.createSubscription();
+
+                        // PRINT 'created subscription' message with name of channel
+                        subscriptionData = subReader.getSubscriptionsData( subscription );
+                        outputBox.update( "Created new subscription: " + subscriptionData.get("Name") );
+
+                    }
+
+                    // Add to sub reader's list of updated subscriptions
+                    subReader.addUpdatedSubscription( subscription );
 
                 }
-
-                // Add to sub reader's list of updated subscriptions
-                subReader.addUpdatedSubscription( subscription );
+                catch( IOException e )
+                {
+                    outputBox.update( "Error with I/O!" );
+                }
 
             }
 
@@ -111,16 +116,6 @@ class MusicSearch
         }
     
     }
-
-
-// - removeUnknownChar() Method - //
-
-    // Keep only wanted characters for titles and channel names so can be checked properly
-    // private String removeUnknownChar( String inText )
-    // {
-    //     String outText = inText.replaceAll("[^a-zA-Z0-9\\s+\\-]", "");
-    //     return outText;
-    // }
 
 
 // - Message Printing - //
